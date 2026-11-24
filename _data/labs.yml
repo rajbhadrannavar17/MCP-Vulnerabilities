@@ -3,34 +3,28 @@
   category: Injection
   description: Use a vulnerable product-search tool to uncover administrator credentials.
   url: /labs/sql-injection-in-mcp-tool/
-  screenshot: /screenshots/01-sql-injection-solved.png
 - number: "02"
   title: Broken access control in a tool
   category: Authorization
   description: Exploit missing account-level authorization in an email-update operation.
   url: /labs/broken-access-control-in-mcp-tool/
-  screenshot: /screenshots/02-broken-access-control-solved.png
 - number: "03"
   title: Hidden tools without restrictions
   category: Authorization
   description: Show why omitting a tool from discovery does not enforce access control.
   url: /labs/mcp-server-hides-tools/
-  screenshot: /screenshots/03-hidden-tools-solved.png
 - number: "04"
   title: Authentication fails open
   category: Authentication
   description: Test the security impact of an unrecognized bearer token being accepted.
   url: /labs/mcp-authentication-fails-open/
-  screenshot: /screenshots/04-authentication-fails-open-solved.png
 - number: "05"
   title: Session ID used for authentication
   category: Session security
   description: Demonstrate the risk of predictable session identifiers acting as credentials.
   url: /labs/mcp-session-id-used-for-authentication/
-  screenshot: /screenshots/05-session-id-authentication-solved.png
 - number: "06"
   title: OAuth account takeover
   category: OAuth
   description: Explore client-registration and consent-binding flaws in an OAuth flow.
   url: /labs/mcp-oauth-account-takeover-dynamic-client-registration/
-  screenshot: /screenshots/06-oauth-account-takeover-solved.png

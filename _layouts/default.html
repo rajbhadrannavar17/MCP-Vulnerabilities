@@ -9,18 +9,15 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="{{ '/' | relative_url }}">MCP<span> / </span>LABS</a>
-    <nav aria-label="Main navigation">
-      <a href="{{ '/' | relative_url }}">All labs</a>
-      <a href="https://github.com/rajbhadrannavar17/MCP-Vulnerabilities/tree/main/writeups/mcp">Source writeups</a>
-    </nav>
+    <a class="brand" href="{{ '/' | relative_url }}">PortSwigger MCP Labs</a>
   </header>
   <main class="page-content">
+    {% if page.url contains '/labs/' %}
+    <a class="back-link" href="{{ '/' | relative_url }}">← All writeups</a>
+    <article class="article-content">{{ content }}</article>
+    {% else %}
     {{ content }}
+    {% endif %}
   </main>
-  <footer class="site-footer">
-    <span>Independent lab notes · For authorized practice environments</span>
-    <a href="https://github.com/rajbhadrannavar17/MCP-Vulnerabilities">View repository</a>
-  </footer>
 </body>
 </html>

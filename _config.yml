@@ -1,5 +1,5 @@
 title: PortSwigger MCP Vulnerabilities Labs
-description: Six hands-on writeups covering security issues in MCP servers.
+description: Detailed walkthroughs for six PortSwigger MCP vulnerability labs.
 url: https://rajbhadrannavar17.github.io
 baseurl: /MCP-Vulnerabilities
 markdown: kramdown

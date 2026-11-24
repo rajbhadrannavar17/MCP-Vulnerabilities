@@ -26,11 +26,9 @@ a {
   color: inherit;
 }
 
-.site-header,
-.site-footer {
+.site-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
   padding: 1rem max(1.25rem, calc((100% - 1120px) / 2));
   background: var(--white);
@@ -47,24 +45,6 @@ a {
   text-decoration: none;
 }
 
-.brand span {
-  color: var(--accent);
-}
-
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  font-size: .9rem;
-}
-
-nav a,
-.site-footer a {
-  text-decoration: none;
-}
-
-nav a:hover,
-.site-footer a:hover,
 .text-link:hover {
   color: var(--accent);
 }
@@ -114,14 +94,6 @@ h3 {
   overflow-wrap: anywhere;
 }
 
-.summary-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .75rem;
-  margin: 0 0 3rem;
-}
-
-.summary-chip,
 .tag {
   display: inline-flex;
   align-items: center;
@@ -130,14 +102,6 @@ h3 {
   background: var(--white);
   font-size: .78rem;
   font-weight: 700;
-}
-
-.summary-chip {
-  padding: .45rem .8rem;
-}
-
-.summary-chip strong {
-  margin-right: .35rem;
 }
 
 .section-heading {
@@ -151,12 +115,6 @@ h3 {
 .section-heading h2 {
   margin: 0;
   font-size: 1.4rem;
-}
-
-.section-heading p {
-  margin: 0;
-  color: var(--muted);
-  font-size: .9rem;
 }
 
 .lab-grid {
@@ -231,58 +189,6 @@ h3 {
   text-decoration: none;
 }
 
-.evidence-status {
-  color: var(--muted);
-  font-size: .72rem;
-  overflow-wrap: anywhere;
-}
-
-.evidence-image {
-  width: 100%;
-  margin: 0 0 1rem;
-}
-
-.evidence-image img {
-  display: block;
-  width: 100%;
-  max-height: 260px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  object-fit: contain;
-  background: #f3f4f5;
-}
-
-.evidence-image figcaption {
-  margin-top: .35rem;
-  color: var(--muted);
-  font-size: .75rem;
-}
-
-.evidence-note {
-  margin-top: 1.5rem;
-  padding: 1rem 1.15rem;
-  border-left: 3px solid var(--accent);
-  background: var(--white);
-  color: var(--muted);
-  font-size: .9rem;
-}
-
-.evidence-note strong {
-  color: var(--ink);
-}
-
-.article-header {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.article-header h1 {
-  margin: 0;
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  letter-spacing: -.04em;
-}
-
 .article-content {
   max-width: 800px;
   padding: clamp(1.25rem, 4vw, 2.5rem);
@@ -346,26 +252,9 @@ h3 {
   text-decoration: none;
 }
 
-.site-footer {
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: .8rem;
-}
-
 @media (max-width: 680px) {
-  .site-header,
-  .site-footer {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .lab-grid {
     grid-template-columns: 1fr;
-  }
-
-  .section-heading {
-    align-items: flex-start;
-    flex-direction: column;
   }
 
   .card-bottom {
