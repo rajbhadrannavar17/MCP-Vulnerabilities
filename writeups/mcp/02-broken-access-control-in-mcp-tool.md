@@ -1,3 +1,9 @@
+---
+layout: default
+title: Broken Access Control in an MCP Server Tool
+permalink: /labs/broken-access-control-in-mcp-tool/
+---
+
 # Broken Access Control in an MCP Server Tool
 
 ## Lab

@@ -1,3 +1,9 @@
+---
+layout: default
+title: MCP Session ID Used for Authentication
+permalink: /labs/mcp-session-id-used-for-authentication/
+---
+
 # MCP Session ID Used for Authentication
 
 ## Lab

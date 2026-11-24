@@ -1,0 +1,6 @@
+title: MCP Vulnerability Labs
+description: Six hands-on writeups covering security issues in MCP servers.
+url: https://rajbhadrannavar17.github.io
+baseurl: /MCP-Vulnerabilities
+markdown: kramdown
+permalink: pretty

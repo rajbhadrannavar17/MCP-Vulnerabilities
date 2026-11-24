@@ -1,3 +1,9 @@
+---
+layout: default
+title: MCP Server Hides Tools Without Restricting Them
+permalink: /labs/mcp-server-hides-tools/
+---
+
 # MCP Server Hides Tools Without Restricting Them
 
 ## Lab

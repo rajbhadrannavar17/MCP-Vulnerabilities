@@ -1,3 +1,9 @@
+---
+layout: default
+title: SQL Injection in an MCP Server Tool
+permalink: /labs/sql-injection-in-mcp-tool/
+---
+
 # SQL Injection in an MCP Server Tool
 
 ## Lab

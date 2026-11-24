@@ -1,0 +1,52 @@
+---
+layout: default
+title: MCP Security Lab Writeups
+description: Browse six solved MCP security labs, their vulnerability notes, and remediation takeaways.
+---
+<section class="hero">
+  <p class="eyebrow">MCP security · hands-on labs</p>
+  <h1>Six ways MCP tools can go wrong.</h1>
+  <p class="hero-copy">
+    A practical collection of lab writeups on authorization, authentication,
+    SQL injection, session security, and OAuth.
+  </p>
+  <div class="summary-row" aria-label="Collection summary">
+    <span class="summary-chip"><strong>06</strong> lab writeups</span>
+    <span class="summary-chip">MCP servers</span>
+    <span class="summary-chip">Authorized labs only</span>
+  </div>
+</section>
+
+<section aria-labelledby="labs-heading">
+  <div class="section-heading">
+    <h2 id="labs-heading">The labs</h2>
+    <p>Open a writeup for the walkthrough and key takeaways.</p>
+  </div>
+
+  <div class="lab-grid">
+    {% for lab in site.data.labs %}
+    {% assign screenshot = site.static_files | where: "path", lab.screenshot | first %}
+    <article class="lab-card">
+      <div class="card-topline"><span class="lab-number">LAB {{ lab.number }}</span><span class="tag">{{ lab.category }}</span></div>
+      <h3>{{ lab.title }}</h3>
+      <p>{{ lab.description }}</p>
+      {% if screenshot %}
+      <figure class="evidence-image">
+        <img src="{{ screenshot.path | relative_url }}" alt="Solved-state evidence for lab {{ lab.number }}" loading="lazy">
+        <figcaption>Lab {{ lab.number }} · solved</figcaption>
+      </figure>
+      {% endif %}
+      <div class="card-bottom">
+        <a class="text-link" href="{{ lab.url | relative_url }}">Read writeup <span aria-hidden="true">→</span></a>
+        <span class="evidence-status">{% if screenshot %}Solved screenshot added{% else %}Evidence missing: <code>{{ lab.screenshot | remove_first: '/' }}</code>{% endif %}</span>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <p class="evidence-note">
+    <strong>Completion evidence:</strong> The matching screenshot filename for each lab is listed in
+    <code>_data/labs.yml</code>. Add genuine captures to <code>screenshots/</code> and they will appear on their lab cards.
+    No evidence images are fabricated.
+  </p>
+</section>

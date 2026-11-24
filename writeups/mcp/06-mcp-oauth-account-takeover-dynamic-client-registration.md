@@ -1,3 +1,9 @@
+---
+layout: default
+title: MCP OAuth Account Takeover via Dynamic Client Registration
+permalink: /labs/mcp-oauth-account-takeover-dynamic-client-registration/
+---
+
 # MCP OAuth Account Takeover via Dynamic Client Registration
 
 ## Lab

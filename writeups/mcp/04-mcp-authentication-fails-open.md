@@ -1,3 +1,9 @@
+---
+layout: default
+title: MCP Server Authentication Fails Open
+permalink: /labs/mcp-authentication-fails-open/
+---
+
 # MCP Server Authentication Fails Open
 
 ## Lab
